@@ -1,0 +1,49 @@
+# Remix specific
+/.cache
+/build
+/public/build
+
+# Dependencies
+/node_modules
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.log
+*.tmp
+*.temp
+
+# Test coverage
+/coverage
+
+# Remix server build
+/api
+
+# TypeScript incremental compilation cache
+*.tsbuildinfo
+
+# Database
+database.sqlite
