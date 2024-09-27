@@ -23,17 +23,18 @@ let googleStrategy = new GoogleStrategy(
   async ({ profile }) => {
     const email = profile.emails[0].value;
 
-    if (allowList.has(email)) {
-      const user: Omit<User, "id"> = {
-        googleId: profile.id,
-        name: profile.displayName,
-        email: email,
-        avatarUrl: profile.photos[0]?.value,
-      };
-      return await createOrUpdateUser(user);
-    } else {
+    if (allowListString && !allowList.has(email)) {
       throw new AuthorizationError("Your account is not authorized.");
     }
+
+    const user: Omit<User, "id"> = {
+      googleId: profile.id,
+      name: profile.displayName,
+      email: email,
+      avatarUrl: profile.photos[0]?.value,
+    };
+
+    return await createOrUpdateUser(user);
   },
 );
 
