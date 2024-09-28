@@ -1,0 +1,13 @@
+services:
+  field:
+    build: .
+    ports:
+      - "80:3000"
+    volumes:
+      - ./database.sqlite:/app/database.sqlite
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    command: sh -c "npm run build && npm run start"
+    restart: always

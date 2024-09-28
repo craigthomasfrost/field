@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "node ./server.js",
     "build": "remix vite:build",
-    "start": "cross-env NODE_ENV=production node  ./server.js",
+    "start": "node ./server.js",
     "prettify": "npx prettier . --write"
   },
   "keywords": [],

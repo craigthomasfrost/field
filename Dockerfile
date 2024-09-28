@@ -1,13 +1,9 @@
-FROM node:20-alpine
+FROM node:22.9.0-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
 
+RUN npm ci
+
 COPY . .
-
-RUN npm ci && npm run build
-
-ENV NODE_ENV=production
-
-CMD ["node", "server.js"]
