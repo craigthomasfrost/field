@@ -1,3 +1,5 @@
+import fs from "fs/promises";
+import path from "path";
 import { Database, open } from "sqlite";
 import sqlite3 from "sqlite3";
 
@@ -22,8 +24,13 @@ interface RawSubtask {
 
 export async function getDb() {
   if (!db) {
+    const dataDir = path.join(process.cwd(), "data");
+    const dbPath = path.join(dataDir, "database.sqlite");
+
+    await fs.mkdir(dataDir, { recursive: true });
+
     db = await open({
-      filename: "database.sqlite",
+      filename: dbPath,
       driver: sqlite3.Database,
     });
 

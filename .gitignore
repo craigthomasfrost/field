@@ -46,4 +46,4 @@ Thumbs.db
 *.tsbuildinfo
 
 # Database
-database.sqlite
+/data
