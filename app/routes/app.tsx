@@ -8,10 +8,14 @@ import classNames from "classnames";
 
 import { getAssistantResponse } from "../.server/ai";
 import {
+  completeTodos,
+  completeSubtasks,
   getMessages,
   getTodos,
   resetMessages,
   saveMessage,
+  uncompleteTodos,
+  uncompleteSubtasks,
 } from "../.server/db";
 import { authenticator } from "../services/auth.server";
 import { Message, Subtask, Todo } from "../utils/types";
@@ -47,6 +51,33 @@ export const action = async ({ request }) => {
     return json({ success: true });
   }
 
+  if (intent === "toggleTodo") {
+    const todoId = Number(formData.get("todoId"));
+    const completed = formData.get("completed") === "true";
+
+    if (completed) {
+      await uncompleteTodos(user.id, [todoId]);
+    } else {
+      await completeTodos(user.id, [todoId]);
+    }
+
+    return json({ success: true });
+  }
+
+  if (intent === "toggleSubtask") {
+    const todoId = Number(formData.get("todoId"));
+    const subtaskId = Number(formData.get("subtaskId"));
+    const completed = formData.get("completed") === "true";
+
+    if (completed) {
+      await uncompleteSubtasks(user.id, [{ todoId, subtaskId }]);
+    } else {
+      await completeSubtasks(user.id, [{ todoId, subtaskId }]);
+    }
+
+    return json({ success: true });
+  }
+
   const userMessage = formData.get("message");
   await saveMessage(user.id, "user", userMessage);
   const result = await getAssistantResponse(userMessage, user.id);
@@ -58,6 +89,7 @@ export default function Home() {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const { todos, messages, user } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
+  const toggleFetcher = useFetcher();
   const allMessages: Message[] = [
     ...messages,
     ...(fetcher.formData
@@ -127,17 +159,29 @@ export default function Home() {
                   className="flex flex-col gap-1 border-b border-gray-200 px-2.5 py-3 hover:bg-gray-50"
                 >
                   <div className="flex items-center gap-2">
-                    <span
+                    <button
+                      onClick={() => {
+                        toggleFetcher.submit(
+                          {
+                            intent: "toggleTodo",
+                            todoId: String(todo.id),
+                            completed: String(todo.completed),
+                          },
+                          { method: "post" },
+                        );
+                      }}
                       className={classNames(
-                        "flex h-4 w-4 items-center justify-center rounded",
+                        "flex h-4 w-4 items-center justify-center rounded cursor-pointer transition-colors",
                         {
-                          "bg-black text-white": todo.completed,
-                          "border border-gray-300 bg-white": !todo.completed,
+                          "bg-black text-white hover:bg-gray-700":
+                            todo.completed,
+                          "border border-gray-300 bg-white hover:border-gray-400":
+                            !todo.completed,
                         },
                       )}
                     >
                       {todo.completed && <CheckIcon className="h-3 w-3" />}
-                    </span>
+                    </button>
                     <span>{todo.text}</span>
                   </div>
                   {todo.subtasks && todo.subtasks?.length > 0 && (
@@ -147,12 +191,24 @@ export default function Home() {
                           key={subtask.id}
                           className="flex items-center gap-2"
                         >
-                          <span
+                          <button
+                            onClick={() => {
+                              toggleFetcher.submit(
+                                {
+                                  intent: "toggleSubtask",
+                                  todoId: String(todo.id),
+                                  subtaskId: String(subtask.id),
+                                  completed: String(subtask.completed),
+                                },
+                                { method: "post" },
+                              );
+                            }}
                             className={classNames(
-                              "flex h-4 w-4 items-center justify-center rounded",
+                              "flex h-4 w-4 items-center justify-center rounded cursor-pointer transition-colors",
                               {
-                                "bg-black text-white": subtask.completed,
-                                "border border-gray-300 bg-white":
+                                "bg-black text-white hover:bg-gray-700":
+                                  subtask.completed,
+                                "border border-gray-300 bg-white hover:border-gray-400":
                                   !subtask.completed,
                               },
                             )}
@@ -160,7 +216,7 @@ export default function Home() {
                             {subtask.completed && (
                               <CheckIcon className="h-3 w-3" />
                             )}
-                          </span>
+                          </button>
                           <span>{subtask.text}</span>
                         </li>
                       ))}
