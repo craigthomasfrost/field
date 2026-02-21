@@ -25,9 +25,16 @@ import {
   uncompleteTodos,
 } from "./db";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openai: OpenAI | null = null;
+
+function getOpenAIClient() {
+  if (!openai) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openai;
+}
 
 export async function getAssistantResponse(
   userMessage: string,
@@ -102,7 +109,7 @@ export async function getAssistantResponse(
   let continueProcessing = true;
 
   while (continueProcessing) {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAIClient().chat.completions.create({
       model: "gpt-4o-mini",
       messages,
       tools: [
